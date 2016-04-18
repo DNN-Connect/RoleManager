@@ -1,0 +1,47 @@
+@inherits RoleManagerWebPage
+@using Connect.DNN.Modules.RoleManager.Common;
+@{
+    RoleManagerModuleContext.AddJqueryUi();
+    RoleManagerModuleContext.AddBootstrapCss();
+    RoleManagerModuleContext.AddModuleScript();
+
+    var roles = RoleManagerModuleContext.Settings.Roles().ToList();
+    var roleCount = roles.Count();
+    var maxColumns = 3;
+    var gridColumns = 12;
+    var defaultColWidth = (int)(gridColumns / maxColumns);
+    var lastPageColWidth = defaultColWidth;
+    var lastPageRoles = roleCount % maxColumns;
+    var pageCount = (int)(roleCount / maxColumns) + 1;
+    if (lastPageRoles > 0)
+    {
+     lastPageColWidth = (int)(gridColumns / lastPageRoles);
+    }
+}
+
+<div class="connectRoleMgr" data-moduleid="@Dnn.ModuleContext.ModuleId"
+     data-resources="@SerializedResources()"
+     data-security="@(Newtonsoft.Json.JsonConvert.SerializeObject(RoleManagerModuleContext.Security))">
+</div>
+
+@for (var pageNr = 1; pageNr <= pageCount; pageNr++)
+{
+ <div class="row">
+  @{
+      var colWidth = (pageNr == pageCount) ? lastPageColWidth : defaultColWidth;
+      var firstRec = (pageNr - 1) * maxColumns;
+      var lastRec = firstRec + maxColumns - 1;
+      if (lastRec > roleCount - 1) { lastRec = roleCount - 1; }
+  }
+  @for (var i = firstRec; i <= lastRec; i++)
+  {
+   var r = roles[i];
+   <div class="roleMgr"
+        data-roleid="@r.RoleID"
+        data-rolename="@r.RoleName"
+        data-colwidth="@colWidth"
+        data-moduleid="@Dnn.ModuleContext.ModuleId">
+   </div>
+  }
+ </div>
+}

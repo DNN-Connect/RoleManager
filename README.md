@@ -1,0 +1,2 @@
+# Connect RoleManager module
+
