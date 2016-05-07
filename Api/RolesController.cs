@@ -28,14 +28,13 @@ namespace Connect.DNN.Modules.RoleManager.Api
         public HttpResponseMessage Users(int id)
         {
             var role = (new RoleController()).GetRoleById(ActiveModule.PortalID, id);
-            var members = RoleProvider.Instance().GetUsersByRoleName(ActiveModule.PortalID, role.RoleName).Cast<UserInfo>().Select(u => new RMUser()
+            IEnumerable<RMUser> members;
+            using (var context = DataContext.Instance())
             {
-                UserId = u.UserID,
-                DisplayName = u.DisplayName,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                Email = u.Email
-            }).ToList().OrderBy(u => u.LastName).OrderBy(u => u.FirstName);
+                members = context.ExecuteQuery<RMUser>(System.Data.CommandType.StoredProcedure,
+                    "{databaseOwner}{objectQualifier}GetUsersByRolename", ActiveModule.PortalID,
+                    role.RoleName).OrderBy(u => u.LastName).OrderBy(u => u.FirstName);
+            }
             return Request.CreateResponse(HttpStatusCode.OK, members);
         }
 
